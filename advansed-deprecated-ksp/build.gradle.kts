@@ -7,6 +7,8 @@ plugins {
 }
 
 dependencies {
+
+    implementation(project(":deprecated-lib"))
 //    implementation("com.google.devtools.ksp:symbol-processing-api:$kspVersion")
 //    implementation(kotlin("stdlib"))
 //    implementation("com.squareup:kotlinpoet:1.12.0")

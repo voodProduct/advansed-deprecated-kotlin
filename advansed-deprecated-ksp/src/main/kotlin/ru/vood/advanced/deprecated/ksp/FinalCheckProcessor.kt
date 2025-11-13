@@ -3,10 +3,11 @@ package ru.vood.advanced.deprecated.ksp
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSFunctionDeclaration
-import com.google.devtools.ksp.symbol.Modifier
+import com.google.devtools.ksp.validate
 import ru.vood.advanced.deprecated.ksp.base.BaseSymbolProcessor
+import ru.vood.advansed.deprecated.DeprecatedWithRemoval
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class FinalCheckProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolProcessor(environment) {
 
@@ -19,111 +20,56 @@ class FinalCheckProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolP
         kspLogger.warn("Run with param $prohibitedModifiersParamName => ${environment.options[prohibitedModifiersParamName]}")
         kspLogger.warn("Run with param $annotationParamName => ${environment.options[annotationParamName]}")
 
-        val requiredModifiersParam = environment.options[requiredModifiersParamName] ?: "PUBLIC;"
-        val prohibitedModifiersParam = environment.options[prohibitedModifiersParamName] ?: "FINAL;"
-        val annotationParam = environment.options[annotationParamName] ?: "kotlin.Deprecated;ru.vood.test.MyAnnotation"
+        val annotatedObjectKotlinObjectList =
+            resolver.getSymbolsWithAnnotation(DeprecatedWithRemoval::class.java.canonicalName)
+        val symbols = annotatedObjectKotlinObjectList.filter { !it.validate() }.toList()
 
-        // валидация внешних настроек
-        val requiredModifiers = extractParam(requiredModifiersParam) { paramStr ->
-            runCatching { Modifier.valueOf(paramStr) }.getOrElse { err ->
-                error(
-                    "for Parameter $requiredModifiersParamName No enum constant ${Modifier::class.simpleName}.$paramStr allow values are -> ${
-                        Modifier.values().map { it.name }
-                    }"
-                )
-            }
-        }
-
-        val prohibitedModifiers = extractParam(prohibitedModifiersParam) { paramStr ->
-            runCatching { Modifier.valueOf(paramStr) }.getOrElse { err ->
-                error(
-                    "for Parameter $prohibitedModifiersParamName No enum constant ${Modifier::class.simpleName}.$paramStr allow values are -> ${
-                        Modifier.values().map { it.name }
-                    }"
-                )
+        symbols
+            .filter { it.validate() }
+            .forEach { symbol ->
+                checkRemovalDate(symbol)
             }
 
-        }
+        return symbols
+    }
 
-
-        val annotation = extractParam(annotationParam) { it }
-
-        kspLogger.warn(
-            """Extracted parameters annotation => $annotation
-            |prohibitedModifiers => $prohibitedModifiers
-            |requiredModifiers => $requiredModifiers
-        """.trimMargin()
-        )
-
-        require(annotation.isNotEmpty()) { kspLogger.error("set param $annotationParamName") }
-        require(requiredModifiers.isNotEmpty() || prohibitedModifiers.isNotEmpty()) { kspLogger.error("set param $requiredModifiersParamName or $prohibitedModifiersParamName") }
-
-
-        // сбор аннотированных объектов
-        val annotatedObjectKotlinObjectList = annotation.flatMap { annotation ->
-            resolver.getSymbolsWithAnnotation(checkNotNull(annotation)).toList()
-        }
-        // сбор мета информации для генерации
-        // анализ или кодогенерация
-        annotatedObjectKotlinObjectList
-            .forEach { ksAnno ->
-                when (ksAnno) {
-                    is KSClassDeclaration -> check(
-                        requiredModifiers,
-                        ksAnno.modifiers,
-                        ksAnno,
-                        prohibitedModifiers,
-                        "Class"
-                    )
-
-                    is KSFunctionDeclaration -> check(
-                        requiredModifiers,
-                        ksAnno.modifiers,
-                        ksAnno,
-                        prohibitedModifiers,
-                        "Method"
+    private fun checkRemovalDate(symbol: KSAnnotated) {
+        symbol.annotations
+            .firstOrNull {
+                it.annotationType.resolve().declaration.qualifiedName?.asString() ==
+                        DeprecatedWithRemoval::class.java.canonicalName
+            }
+            ?.let { annotation ->
+                annotation.arguments
+                    .firstOrNull { it.name?.asString() == "removalDate" }
+                    ?.value as? String
+            }?.let { removalDate ->
+                if (removalDate.isNotEmpty() && isDatePassed(removalDate, symbol)) {
+                    environment.logger.error(
+                        "Element $symbol should be removed - removal date $removalDate has passed",
+                        symbol
                     )
                 }
             }
-        return listOf()
     }
 
-    private fun check(
-        requiredModifiers: List<Modifier>,
-        modifiers: Set<Modifier>,
-        ksAnno: KSAnnotated,
-        prohibitedModifiers: List<Modifier>,
-        objectName: String
-    ) {
-        val notExistModifier = requiredModifiers.filter { modifier ->
-            !modifiers.contains(modifier)
-        }
 
+    private fun isDatePassed(dateString: String, annotated: KSAnnotated): Boolean {
+        return try {
 
-        if (notExistModifier.isNotEmpty()) {
-            kspLogger.error(
-                "$objectName must contains Modifiers $notExistModifier. Current Modifiers are $modifiers",
-                ksAnno
+            val formatter = DateTimeFormatter.ofPattern(patternRemovalDate)
+            val removalDate = LocalDate.parse(dateString, formatter)
+            removalDate.isBefore(LocalDate.now())
+        } catch (e: Exception) {
+            environment.logger.error(
+                "Attribute '${DeprecatedWithRemoval::removalDate.name}' in annotation '${DeprecatedWithRemoval::class.simpleName}' should have format $patternRemovalDate",
+                annotated
             )
-        }
-
-        val prohibitedModifier = prohibitedModifiers.filter { modifier ->
-            modifiers.contains(modifier)
-        }
-
-        if (prohibitedModifier.isNotEmpty()) {
-            kspLogger.error("$objectName contains prohibitedModifier Modifiers $prohibitedModifier", ksAnno)
+            false
         }
     }
 
-    private fun <T> extractParam(paramValue: String?, extractor: (String) -> T): List<T> {
-
-        return paramValue?.let {
-            it
-                .split(";")
-                .map { param -> param.trim() }
-                .filter { param -> param.isNotEmpty() }
-                .map { paramStr -> extractor(paramStr) }
-        } ?: listOf()
+    companion object {
+        const val patternRemovalDate = "yyyy-MM-dd"
     }
 }
