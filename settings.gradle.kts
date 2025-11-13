@@ -17,15 +17,15 @@ pluginManagement {
     }
 
     repositories {
-        jcenter()
+
         gradlePluginPortal()
         mavenCentral()
     }
 }
 
 
-include(":final-check-processor")
-include(":testApp")
+include(":deprecated-lib")
+//include(":testApp")
 //include(":workload")
 
 
