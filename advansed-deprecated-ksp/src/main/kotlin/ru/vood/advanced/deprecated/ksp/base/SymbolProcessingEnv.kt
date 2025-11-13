@@ -1,4 +1,4 @@
-package ru.vood.processor.finalcheck.base
+package ru.vood.advanced.deprecated.ksp.base
 
 import com.google.devtools.ksp.processing.KSPLogger
 

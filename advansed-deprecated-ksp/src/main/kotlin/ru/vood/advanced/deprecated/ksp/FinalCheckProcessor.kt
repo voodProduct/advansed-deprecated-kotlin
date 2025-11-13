@@ -1,4 +1,4 @@
-package ru.vood.advansed.deprecated.ksp
+package ru.vood.advanced.deprecated.ksp
 
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
@@ -6,7 +6,7 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.Modifier
-import ru.vood.processor.finalcheck.base.BaseSymbolProcessor
+import ru.vood.advanced.deprecated.ksp.base.BaseSymbolProcessor
 
 class FinalCheckProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolProcessor(environment) {
 
@@ -19,9 +19,9 @@ class FinalCheckProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolP
         kspLogger.warn("Run with param $prohibitedModifiersParamName => ${environment.options[prohibitedModifiersParamName]}")
         kspLogger.warn("Run with param $annotationParamName => ${environment.options[annotationParamName]}")
 
-        val requiredModifiersParam = environment.options[requiredModifiersParamName]?:"PUBLIC;"
-        val prohibitedModifiersParam = environment.options[prohibitedModifiersParamName]?:"FINAL;"
-        val annotationParam = environment.options[annotationParamName]?:"kotlin.Deprecated;ru.vood.test.MyAnnotation"
+        val requiredModifiersParam = environment.options[requiredModifiersParamName] ?: "PUBLIC;"
+        val prohibitedModifiersParam = environment.options[prohibitedModifiersParamName] ?: "FINAL;"
+        val annotationParam = environment.options[annotationParamName] ?: "kotlin.Deprecated;ru.vood.test.MyAnnotation"
 
         // валидация внешних настроек
         val requiredModifiers = extractParam(requiredModifiersParam) { paramStr ->
@@ -48,10 +48,12 @@ class FinalCheckProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolP
 
         val annotation = extractParam(annotationParam) { it }
 
-        kspLogger.warn("""Extracted parameters annotation => $annotation
+        kspLogger.warn(
+            """Extracted parameters annotation => $annotation
             |prohibitedModifiers => $prohibitedModifiers
             |requiredModifiers => $requiredModifiers
-        """.trimMargin())
+        """.trimMargin()
+        )
 
         require(annotation.isNotEmpty()) { kspLogger.error("set param $annotationParamName") }
         require(requiredModifiers.isNotEmpty() || prohibitedModifiers.isNotEmpty()) { kspLogger.error("set param $requiredModifiersParamName or $prohibitedModifiersParamName") }
@@ -64,10 +66,23 @@ class FinalCheckProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolP
         // сбор мета информации для генерации
         // анализ или кодогенерация
         annotatedObjectKotlinObjectList
-            .forEach {ksAnno ->
-                when(ksAnno){
-                    is KSClassDeclaration ->check(requiredModifiers, ksAnno.modifiers, ksAnno, prohibitedModifiers, "Class")
-                    is KSFunctionDeclaration ->check(requiredModifiers, ksAnno.modifiers, ksAnno, prohibitedModifiers, "Method")
+            .forEach { ksAnno ->
+                when (ksAnno) {
+                    is KSClassDeclaration -> check(
+                        requiredModifiers,
+                        ksAnno.modifiers,
+                        ksAnno,
+                        prohibitedModifiers,
+                        "Class"
+                    )
+
+                    is KSFunctionDeclaration -> check(
+                        requiredModifiers,
+                        ksAnno.modifiers,
+                        ksAnno,
+                        prohibitedModifiers,
+                        "Method"
+                    )
                 }
             }
         return listOf()
@@ -86,7 +101,10 @@ class FinalCheckProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolP
 
 
         if (notExistModifier.isNotEmpty()) {
-            kspLogger.error("$objectName must contains Modifiers $notExistModifier. Current Modifiers are $modifiers", ksAnno)
+            kspLogger.error(
+                "$objectName must contains Modifiers $notExistModifier. Current Modifiers are $modifiers",
+                ksAnno
+            )
         }
 
         val prohibitedModifier = prohibitedModifiers.filter { modifier ->
@@ -104,7 +122,7 @@ class FinalCheckProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolP
             it
                 .split(";")
                 .map { param -> param.trim() }
-                .filter {  param -> param.isNotEmpty() }
+                .filter { param -> param.isNotEmpty() }
                 .map { paramStr -> extractor(paramStr) }
         } ?: listOf()
     }
