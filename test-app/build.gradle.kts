@@ -13,7 +13,7 @@ dependencies {
 }
 
 ksp {
-    arg("currentVersion", version.toString())
+    arg("currentVersion", "1.1.1")
 }
 
 kotlin {
