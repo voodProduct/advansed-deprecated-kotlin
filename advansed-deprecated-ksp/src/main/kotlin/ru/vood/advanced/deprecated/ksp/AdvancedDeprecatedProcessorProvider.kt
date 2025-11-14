@@ -6,6 +6,6 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 
 class AdvancedDeprecatedProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
-        return FinalCheckProcessor(environment)
+        return AdvancedDeprecatedProcessor(environment)
     }
 }

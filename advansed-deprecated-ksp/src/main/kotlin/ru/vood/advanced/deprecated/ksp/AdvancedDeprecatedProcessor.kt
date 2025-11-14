@@ -10,7 +10,7 @@ import ru.vood.advansed.deprecated.DeprecatedWithRemoval
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-class FinalCheckProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolProcessor(environment) {
+class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolProcessor(environment) {
 
     private val currentVersion: String by lazy {
         environment.options["currentVersion"] ?: error("currentVersion option is required")
