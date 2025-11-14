@@ -37,6 +37,10 @@ publishing{
         }
     }
 }
+
+tasks.test {
+    useJUnitPlatform()
+}
 //publishing {
 //    publications {
 //        maven(MavenPublication) {
