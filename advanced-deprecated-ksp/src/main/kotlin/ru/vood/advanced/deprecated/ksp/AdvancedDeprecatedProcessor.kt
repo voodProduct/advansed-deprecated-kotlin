@@ -25,7 +25,6 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
         val annotatedObjectKotlinObjectList =
             resolver.getSymbolsWithAnnotation(DeprecatedWithRemoval::class.java.canonicalName)
         val symbols = annotatedObjectKotlinObjectList
-//            .filter { !it.validate() }
             .toList()
 
         annotatedObjectKotlinObjectList
