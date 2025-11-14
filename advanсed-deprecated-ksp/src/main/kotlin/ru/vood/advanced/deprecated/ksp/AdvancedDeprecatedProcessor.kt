@@ -20,11 +20,18 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
     private val currentVersionName = "currentVersion"
     override fun processRound(resolver: Resolver): List<KSAnnotated> {
         // вычитка внешних настроек
-        kspLogger.warn("Run with param $currentVersionName => $currentVersion")
+        kspLogger.info("Run with param $currentVersionName => $currentVersion")
 
         val annotatedObjectKotlinObjectList =
             resolver.getSymbolsWithAnnotation(DeprecatedWithRemoval::class.java.canonicalName)
-        val symbols = annotatedObjectKotlinObjectList.filter { !it.validate() }.toList()
+        val symbols = annotatedObjectKotlinObjectList
+//            .filter { !it.validate() }
+            .toList()
+
+        annotatedObjectKotlinObjectList.forEach {
+            kspLogger.info("Annotated object ", it)
+        }
+
 
         symbols
             .filter { it.validate() }
@@ -68,7 +75,7 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
                     if (currentVersion != null){
                         if(isVersionReached(deletedInVersionValue, currentVersion, annotated)){
                             environment.logger.error(
-                                "Element $annotated should be removed - in version $deletedInVersionValue current version currentVersion",
+                                "Element $annotated should be removed - in version $deletedInVersionValue current version $currentVersion",
                                 annotated
                             )
                         }

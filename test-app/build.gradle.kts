@@ -16,11 +16,11 @@ ksp {
     arg("currentVersion", "1.1.1")
 }
 
-kotlin {
-    sourceSets.main {
-        kotlin.srcDirs(
-            "src/main/kotlin",
-            "build/generated/ksp/main/kotlin"
-        )
-    }
-}
+//kotlin {
+//    sourceSets.main {
+//        kotlin.srcDirs(
+//            "src/main/kotlin",
+//            "build/generated/ksp/main/kotlin"
+//        )
+//    }
+//}
