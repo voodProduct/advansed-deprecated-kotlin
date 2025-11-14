@@ -5,6 +5,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.validate
 import ru.vood.advanced.deprecated.ksp.base.BaseSymbolProcessor
+import ru.vood.advanced.deprecated.ksp.util.DeprecatedAnnotationDto
 import ru.vood.advanced.deprecated.ksp.util.VersionComparator
 import ru.vood.advansed.deprecated.DeprecatedWithRemoval
 import java.time.LocalDate
@@ -34,23 +35,49 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
         return symbols
     }
 
-    private fun checkRemovalDate(symbol: KSAnnotated) {
-        symbol.annotations
+    private fun checkRemovalDate(annotated: KSAnnotated) {
+        annotated.annotations
             .firstOrNull {
                 it.annotationType.resolve().declaration.qualifiedName?.asString() ==
                         DeprecatedWithRemoval::class.java.canonicalName
             }
             ?.let { annotation ->
-                annotation.arguments
-                    .firstOrNull { it.name?.asString() == "removalDate" }
+                val deletedInVersionValue = annotation.arguments
+                    .firstOrNull { it.name?.asString() == DeprecatedWithRemoval::deletedInVersion.name }
                     ?.value as? String
-            }?.let { removalDate ->
-                if (removalDate.isNotEmpty() && isDatePassed(removalDate, symbol)) {
+
+                val removalDateValue = annotation.arguments
+                    .firstOrNull { it.name?.asString() == DeprecatedWithRemoval::removalDate.name }
+                    ?.value as? String
+                DeprecatedAnnotationDto(deletedInVersionValue, removalDateValue)
+            }?.let { deprecatedAnnotationDto ->
+                val (deletedInVersionValue, removalDateValue) = deprecatedAnnotationDto
+                if (removalDateValue != null && removalDateValue.isNotEmpty() && isDatePassed(
+                        removalDateValue,
+                        annotated
+                    )
+                ) {
                     environment.logger.error(
-                        "Element $symbol should be removed - removal date $removalDate has passed",
-                        symbol
+                        "Element $annotated should be removed - removal date $removalDateValue has passed",
+                        annotated
                     )
                 }
+
+                if (deletedInVersionValue !=null && deletedInVersionValue.isNotEmpty()){
+                    val currentVersion = currentVersion
+                    if (currentVersion != null){
+                        if(isVersionReached(deletedInVersionValue, currentVersion, annotated)){
+                            environment.logger.error(
+                                "Element $annotated should be removed - in version $deletedInVersionValue current version currentVersion",
+                                annotated
+                            )
+                        }
+                    } else environment.logger.error(
+                            "KSP param $currentVersionName must be specified in property build.gradle.kts",
+                    annotated
+                    )
+                }
+
             }
     }
 
@@ -70,7 +97,7 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
         }
     }
 
-    private fun isVersionReached(targetVersion: String, currentVersion: String): Boolean {
+    private fun isVersionReached(targetVersion: String, currentVersion: String, annotated: KSAnnotated): Boolean {
         return try {
             VersionComparator.isCurrentVersionGreaterOrEqual(currentVersion, targetVersion)
         } catch (e: Exception) {
