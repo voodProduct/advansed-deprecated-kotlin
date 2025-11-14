@@ -45,6 +45,9 @@ class VersionComparatorTest : BehaviorSpec({
             { (current, target, expected) ->
                 "current: $current, target: $target, expected: $expected"
             },
+            Triple("4", "3", true),   // major больше
+            Triple("1.4", "1.3", true),   // major больше
+            Triple("1.4.4", "1.4.3", true),   // major больше
             Triple("2.0.0", "1.0.0", true),   // major больше
             Triple("1.1.0", "1.0.0", true),   // minor больше
             Triple("1.0.1", "1.0.0", true),   // patch больше
