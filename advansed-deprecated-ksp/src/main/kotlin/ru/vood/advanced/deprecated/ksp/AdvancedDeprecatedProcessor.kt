@@ -90,7 +90,7 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
             removalDate.isBefore(LocalDate.now())
         } catch (e: Exception) {
             environment.logger.error(
-                "Attribute '${DeprecatedWithRemoval::removalDate.name}' in annotation '${DeprecatedWithRemoval::class.simpleName}' should have format $patternRemovalDate",
+                "Attribute '${DeprecatedWithRemoval::removalDate.name}' in annotation '${DeprecatedWithRemoval::class.simpleName}' should have format $patternRemovalDate, parse exception ${e.message}",
                 annotated
             )
             false
