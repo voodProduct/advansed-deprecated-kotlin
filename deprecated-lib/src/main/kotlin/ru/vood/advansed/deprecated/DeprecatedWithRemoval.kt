@@ -18,9 +18,5 @@ public annotation class DeprecatedWithRemoval(
     val message: String = "",
     val replaceWith: ReplaceWith = ReplaceWith(""),
     val level: DeprecationLevel = DeprecationLevel.WARNING
-){
-    companion object {
-        const val VERSION_PATTERN = """^(\d+)\.(\d+)\.(\d+)(-[a-zA-Z0-9.+]+)?$"""
-    }
-}
+)
 

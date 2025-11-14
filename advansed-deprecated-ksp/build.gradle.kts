@@ -1,5 +1,7 @@
 val kspVersion: String by project
 val kotlinpoet: String by project
+val kotestVersion: String by project
+
 
 plugins {
     kotlin("jvm")
@@ -14,8 +16,11 @@ dependencies {
     implementation("com.squareup:kotlinpoet:${kotlinpoet}")
     implementation("com.squareup:kotlinpoet-ksp:${kotlinpoet}")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
-
+//    testImplementation("org.junit.jupiter:junit-jupiter:6.0.1")
+    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
+//    testImplementation("io.kotest:kotest-framework-datatest:$kotestVersion")
+    testImplementation("io.kotest:kotest-framework-engine:${kotestVersion}")
 }
 repositories {
     mavenCentral()

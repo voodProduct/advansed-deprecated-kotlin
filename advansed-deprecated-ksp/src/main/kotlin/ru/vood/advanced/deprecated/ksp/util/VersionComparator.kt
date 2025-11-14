@@ -1,11 +1,9 @@
 package ru.vood.advanced.deprecated.ksp.util
 
-import ru.vood.advansed.deprecated.DeprecatedWithRemoval
-
 object VersionComparator {
 
     fun parseVersion(version: String): Version {
-        val pattern = Regex(DeprecatedWithRemoval.VERSION_PATTERN)
+        val pattern = Regex(VERSION_PATTERN)
         val match = pattern.find(version) ?: throw IllegalArgumentException("Invalid version format: $version")
 
         val (major, minor, patch, suffix) = match.destructured
@@ -35,4 +33,6 @@ object VersionComparator {
         val patch: Int,
         val suffix: String = ""
     )
+        const val VERSION_PATTERN = """^(\d+)\.(\d+)\.(\d+)(-[a-zA-Z0-9.+]+)?$"""
+
 }
