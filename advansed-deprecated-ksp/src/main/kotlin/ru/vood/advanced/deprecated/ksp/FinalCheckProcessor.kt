@@ -5,11 +5,16 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.validate
 import ru.vood.advanced.deprecated.ksp.base.BaseSymbolProcessor
+import ru.vood.advanced.deprecated.ksp.util.VersionComparator
 import ru.vood.advansed.deprecated.DeprecatedWithRemoval
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class FinalCheckProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolProcessor(environment) {
+
+    private val currentVersion: String by lazy {
+        environment.options["currentVersion"] ?: error("currentVersion option is required")
+    }
 
     private val requiredModifiersParamName = "requiredModifiers"
     private val prohibitedModifiersParamName = "prohibitedModifiers"
@@ -65,6 +70,15 @@ class FinalCheckProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolP
                 "Attribute '${DeprecatedWithRemoval::removalDate.name}' in annotation '${DeprecatedWithRemoval::class.simpleName}' should have format $patternRemovalDate",
                 annotated
             )
+            false
+        }
+    }
+
+    private fun isVersionReached(targetVersion: String): Boolean {
+        return try {
+            VersionComparator.isCurrentVersionGreaterOrEqual(currentVersion, targetVersion)
+        } catch (e: Exception) {
+            environment.logger.warn("Invalid version format: $targetVersion", null)
             false
         }
     }

@@ -12,11 +12,15 @@ import kotlin.annotation.AnnotationTarget.TYPEALIAS
 @Target(CLASS, FUNCTION, PROPERTY, ANNOTATION_CLASS, CONSTRUCTOR, PROPERTY_SETTER, PROPERTY_GETTER, TYPEALIAS)
 @Retention(AnnotationRetention.SOURCE)
 @MustBeDocumented
-annotation class DeprecatedWithRemoval(
+public annotation class DeprecatedWithRemoval(
     val removalDate: String = "",
-    val removalVersion: String = "",
+    val deletedInVersion: String = "",
     val message: String = "",
     val replaceWith: ReplaceWith = ReplaceWith(""),
     val level: DeprecationLevel = DeprecationLevel.WARNING
-)
+){
+    companion object {
+        const val VERSION_PATTERN = """^(\d+)\.(\d+)\.(\d+)(-[a-zA-Z0-9.+]+)?$"""
+    }
+}
 
