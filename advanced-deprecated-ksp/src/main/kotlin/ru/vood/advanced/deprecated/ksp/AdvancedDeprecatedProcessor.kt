@@ -4,10 +4,10 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.validate
+import ru.vood.advanced.deprecated.DeprecatedWithRemoval
 import ru.vood.advanced.deprecated.ksp.base.BaseSymbolProcessor
 import ru.vood.advanced.deprecated.ksp.util.DeprecatedAnnotationDto
 import ru.vood.advanced.deprecated.ksp.util.VersionComparator
-import ru.vood.advanced.deprecated.DeprecatedWithRemoval
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -28,9 +28,18 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
 //            .filter { !it.validate() }
             .toList()
 
-        annotatedObjectKotlinObjectList.forEach {
-            kspLogger.info("Annotated object ", it)
-        }
+        annotatedObjectKotlinObjectList
+            .flatMap { annotated -> annotated.annotations }
+            .filter {
+                it.annotationType.resolve().declaration.qualifiedName?.asString() ==
+                        DeprecatedWithRemoval::class.java.canonicalName
+            }
+            .forEach { annotation ->
+                val messageValue = annotation.arguments
+                    .firstOrNull { it.name?.asString() == DeprecatedWithRemoval::message.name }
+                    ?.value as String
+                kspLogger.warn("Deprecated object with message => $messageValue", annotation)
+            }
 
 
         symbols
@@ -75,18 +84,18 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
                     )
                 }
 
-                if (deletedInVersionValue !=null && deletedInVersionValue.isNotEmpty()){
+                if (deletedInVersionValue != null && deletedInVersionValue.isNotEmpty()) {
                     val currentVersion = currentVersion
-                    if (currentVersion != null){
-                        if(isVersionReached(deletedInVersionValue, currentVersion, annotated)){
+                    if (currentVersion != null) {
+                        if (isVersionReached(deletedInVersionValue, currentVersion, annotated)) {
                             environment.logger.error(
                                 "Element $annotated should be removed - in version $deletedInVersionValue current version $currentVersion. Message => $messageValue",
                                 annotated
                             )
                         }
                     } else environment.logger.error(
-                            "KSP param $currentVersionName must be specified as property build.gradle.kts",
-                    annotated
+                        "KSP param $currentVersionName must be specified as property build.gradle.kts",
+                        annotated
                     )
                 }
 
