@@ -13,8 +13,8 @@ repositories {
 publishing{
     publications{
         create<MavenPublication>("maven") {
-            groupId = "ru.vood.advansed.deprecated"
-            artifactId = "advansed-deprecated"
+            groupId = "ru.vood.advanсed.deprecated"
+            artifactId = "advanсed-deprecated"
             version = "1.0.0"
 
             from(components["java"])

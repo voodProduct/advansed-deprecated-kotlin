@@ -7,7 +7,7 @@ import com.google.devtools.ksp.validate
 import ru.vood.advanced.deprecated.ksp.base.BaseSymbolProcessor
 import ru.vood.advanced.deprecated.ksp.util.DeprecatedAnnotationDto
 import ru.vood.advanced.deprecated.ksp.util.VersionComparator
-import ru.vood.advansed.deprecated.DeprecatedWithRemoval
+import ru.vood.advanсed.deprecated.DeprecatedWithRemoval
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

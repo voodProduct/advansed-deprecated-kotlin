@@ -34,8 +34,8 @@ repositories {
 publishing{
     publications{
         create<MavenPublication>("maven") {
-            groupId = "ru.vood.advansed.deprecated"
-            artifactId = "advansed-deprecated-ksp"
+            groupId = "ru.vood.advanсed.deprecated"
+            artifactId = "advanсed-deprecated-ksp"
             version = "1.0.0"
 
             from(components["java"])
