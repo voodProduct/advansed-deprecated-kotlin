@@ -6,7 +6,7 @@ import ru.vood.advanсed.deprecated.DeprecatedWithRemoval
     message = "asdasd",
 //    removalDate = "2000-12-12",
 //    deletedInVersion = "0.1.2",
-    )
+)
 final class Annotated {
 
     @DeprecatedWithRemoval(
@@ -14,5 +14,6 @@ final class Annotated {
 //    removalDate = "2000-12-12",
 //    deletedInVersion = "0.1.2",
     )
-    final fun qwerty(){}
+    final fun qwerty() {
+    }
 }
