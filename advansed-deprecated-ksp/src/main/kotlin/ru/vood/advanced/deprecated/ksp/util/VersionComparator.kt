@@ -19,36 +19,35 @@ object VersionComparator {
         val current = parseVersion(currentVersion)
         val target = parseVersion(targetVersion)
 
-        return when {
-            !compareRequiredInt(current.major, target.major, ::greater) -> false
-            !compareOptionalInt(current.minor, target.minor, ::greater) -> false
-            !compareOptionalInt(current.patch, target.patch, ::greater) -> false
-            else -> compareSuffix(current.suffix, target.suffix)
+        return compareVersions(current, target)
+    }
+
+    private fun compareVersions(current: Version, target: Version): Boolean {
+        // Сравниваем major
+        when {
+            current.major > target.major -> return true
+            current.major < target.major -> return false
         }
-    }
 
-    private fun compareRequiredInt(
-        current: Int,
-        target: Int,
-        comparator: (Int, Int) -> Boolean
-    ): Boolean {
-        return comparator(current, target) || current == target
-    }
-
-    private fun compareOptionalInt(
-        current: Int?,
-        target: Int?,
-        comparator: (Int, Int) -> Boolean
-    ): Boolean {
-        return when {
-            current == null && target == null -> true // оба null - продолжаем сравнение
-            current == null -> false // текущая версия не определена, а целевая есть
-            target == null -> true // целевая версия не определена, а текущая есть
-            else ->  current >= target
+        // major равны, сравниваем minor
+        val currentMinor = current.minor ?: 0
+        val targetMinor = target.minor ?: 0
+        when {
+            currentMinor > targetMinor -> return true
+            currentMinor < targetMinor -> return false
         }
-    }
 
-    private fun greater(a: Int, b: Int): Boolean = a > b
+        // minor равны, сравниваем patch
+        val currentPatch = current.patch ?: 0
+        val targetPatch = target.patch ?: 0
+        when {
+            currentPatch > targetPatch -> return true
+            currentPatch < targetPatch -> return false
+        }
+
+        // Все числовые компоненты равны, сравниваем суффиксы
+        return compareSuffix(current.suffix, target.suffix)
+    }
 
     private fun compareSuffix(current: String?, target: String?): Boolean {
         return when {
@@ -67,5 +66,4 @@ object VersionComparator {
     )
 
     const val VERSION_PATTERN = """^(\d+)(?:\.(\d*))?(?:\.(\d*))?([._-]?[a-zA-Z0-9.+]+)?$"""
-
 }

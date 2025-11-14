@@ -45,16 +45,16 @@ class VersionComparatorTest : BehaviorSpec({
             { (current, target, expected) ->
                 "current: $current, target: $target, expected: $expected"
             },
-//            Triple("2.0.0", "1.0.0", true),   // major больше
-//            Triple("1.1.0", "1.0.0", true),   // minor больше
-//            Triple("1.0.1", "1.0.0", true),   // patch больше
-//            Triple("1.0.0", "1.0.0", true),   // равны
-//            Triple("1.0.0", "2.0.0", false),  // major меньше
-//            Triple("1.0.0", "1.1.0", false),  // minor меньше
-//            Triple("1.0.0", "1.0.1", false),  // patch меньше
-//            Triple("1.0.0-beta", "1.0.0", false),  // суффикс не влияет
-//            Triple("1.0.0", "1.0.0-beta", true),  // суффикс влияет
-//            Triple("1.1.1", "1.1.0", true),   // patch больше при равных major/minor
+            Triple("2.0.0", "1.0.0", true),   // major больше
+            Triple("1.1.0", "1.0.0", true),   // minor больше
+            Triple("1.0.1", "1.0.0", true),   // patch больше
+            Triple("1.0.0", "1.0.0", true),   // равны
+            Triple("1.0.0", "2.0.0", false),  // major меньше
+            Triple("1.0.0", "1.1.0", false),  // minor меньше
+            Triple("1.0.0", "1.0.1", false),  // patch меньше
+            Triple("1.0.0-beta", "1.0.0", false),  // суффикс не влияет
+            Triple("1.0.0", "1.0.0-beta", true),  // суффикс влияет
+            Triple("1.1.1", "1.1.0", true),   // patch больше при равных major/minor
             Triple("2.1.0", "2.0.9", true),   // minor больше при равном major
             Triple("3.0.0", "2.9.9", true)    // major больше
         ) { (current, target, expected) ->
