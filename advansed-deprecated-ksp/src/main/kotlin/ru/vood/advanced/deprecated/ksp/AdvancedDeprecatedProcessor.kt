@@ -12,18 +12,14 @@ import java.time.format.DateTimeFormatter
 
 class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : BaseSymbolProcessor(environment) {
 
-    private val currentVersion: String by lazy {
-        environment.options["currentVersion"] ?: error("currentVersion option is required")
+    private val currentVersion: String? by lazy {
+        environment.options[currentVersionName]
     }
 
-    private val requiredModifiersParamName = "requiredModifiers"
-    private val prohibitedModifiersParamName = "prohibitedModifiers"
-    private val annotationParamName = "annotation"
+    private val currentVersionName = "currentVersion"
     override fun processRound(resolver: Resolver): List<KSAnnotated> {
         // вычитка внешних настроек
-        kspLogger.warn("Run with param $requiredModifiersParamName => ${environment.options[requiredModifiersParamName]}")
-        kspLogger.warn("Run with param $prohibitedModifiersParamName => ${environment.options[prohibitedModifiersParamName]}")
-        kspLogger.warn("Run with param $annotationParamName => ${environment.options[annotationParamName]}")
+        kspLogger.warn("Run with param $currentVersionName => $currentVersion")
 
         val annotatedObjectKotlinObjectList =
             resolver.getSymbolsWithAnnotation(DeprecatedWithRemoval::class.java.canonicalName)
@@ -74,7 +70,7 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
         }
     }
 
-    private fun isVersionReached(targetVersion: String): Boolean {
+    private fun isVersionReached(targetVersion: String, currentVersion: String): Boolean {
         return try {
             VersionComparator.isCurrentVersionGreaterOrEqual(currentVersion, targetVersion)
         } catch (e: Exception) {
