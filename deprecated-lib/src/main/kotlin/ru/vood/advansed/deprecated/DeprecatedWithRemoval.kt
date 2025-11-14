@@ -13,10 +13,11 @@ import kotlin.annotation.AnnotationTarget.TYPEALIAS
 @Retention(AnnotationRetention.SOURCE)
 @MustBeDocumented
 public annotation class DeprecatedWithRemoval(
+    val message: String,
     val removalDate: String = "",
     val deletedInVersion: String = "",
-    val message: String = "",
-    val replaceWith: ReplaceWith = ReplaceWith(""),
-    val level: DeprecationLevel = DeprecationLevel.WARNING
+
+//    val replaceWith: ReplaceWith = ReplaceWith(""),
+//    val level: DeprecationLevel = DeprecationLevel.WARNING
 )
 
