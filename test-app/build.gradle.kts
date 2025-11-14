@@ -9,7 +9,7 @@ repositories {
 
 dependencies {
     implementation(project("::deprecated-lib"))
-    ksp(project("::advanсed-deprecated-ksp"))
+    ksp(project("::advanced-deprecated-ksp"))
 }
 
 ksp {

@@ -1,4 +1,4 @@
-package ru.vood.advanсed.deprecated
+package ru.vood.advanced.deprecated
 
 import kotlin.annotation.AnnotationTarget.ANNOTATION_CLASS
 import kotlin.annotation.AnnotationTarget.CLASS

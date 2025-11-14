@@ -7,7 +7,7 @@ import com.google.devtools.ksp.validate
 import ru.vood.advanced.deprecated.ksp.base.BaseSymbolProcessor
 import ru.vood.advanced.deprecated.ksp.util.DeprecatedAnnotationDto
 import ru.vood.advanced.deprecated.ksp.util.VersionComparator
-import ru.vood.advanсed.deprecated.DeprecatedWithRemoval
+import ru.vood.advanced.deprecated.DeprecatedWithRemoval
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -53,19 +53,24 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
                     .firstOrNull { it.name?.asString() == DeprecatedWithRemoval::deletedInVersion.name }
                     ?.value as? String
 
+                val messageValue = annotation.arguments
+                    .firstOrNull { it.name?.asString() == DeprecatedWithRemoval::message.name }
+                    ?.value as String
+
+
                 val removalDateValue = annotation.arguments
                     .firstOrNull { it.name?.asString() == DeprecatedWithRemoval::removalDate.name }
                     ?.value as? String
-                DeprecatedAnnotationDto(deletedInVersionValue, removalDateValue)
+                DeprecatedAnnotationDto(deletedInVersionValue, removalDateValue, messageValue)
             }?.let { deprecatedAnnotationDto ->
-                val (deletedInVersionValue, removalDateValue) = deprecatedAnnotationDto
+                val (deletedInVersionValue, removalDateValue, messageValue) = deprecatedAnnotationDto
                 if (removalDateValue != null && removalDateValue.isNotEmpty() && isDatePassed(
                         removalDateValue,
                         annotated
                     )
                 ) {
                     environment.logger.error(
-                        "Element $annotated should be removed - removal date $removalDateValue has passed",
+                        "Element $annotated should be removed - removal date $removalDateValue has passed. Message => $messageValue",
                         annotated
                     )
                 }
@@ -75,12 +80,12 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
                     if (currentVersion != null){
                         if(isVersionReached(deletedInVersionValue, currentVersion, annotated)){
                             environment.logger.error(
-                                "Element $annotated should be removed - in version $deletedInVersionValue current version $currentVersion",
+                                "Element $annotated should be removed - in version $deletedInVersionValue current version $currentVersion. Message => $messageValue",
                                 annotated
                             )
                         }
                     } else environment.logger.error(
-                            "KSP param $currentVersionName must be specified in property build.gradle.kts",
+                            "KSP param $currentVersionName must be specified as property build.gradle.kts",
                     annotated
                     )
                 }
@@ -97,7 +102,7 @@ class AdvancedDeprecatedProcessor(environment: SymbolProcessorEnvironment) : Bas
             removalDate.isBefore(LocalDate.now())
         } catch (e: Exception) {
             environment.logger.error(
-                "Attribute '${DeprecatedWithRemoval::removalDate.name}' in annotation '${DeprecatedWithRemoval::class.simpleName}' should have format $patternRemovalDate, parse exception ${e.message}",
+                "Attribute '${DeprecatedWithRemoval::removalDate.name}' in annotation '${DeprecatedWithRemoval::class.simpleName}' should have format '$patternRemovalDate', parse exception ${e.message}",
                 annotated
             )
             false

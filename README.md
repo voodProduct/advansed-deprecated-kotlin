@@ -1,2 +1,2 @@
-# advanсed-deprecated-kotlin
+# advanced-deprecated-kotlin
 implements ad

@@ -25,7 +25,7 @@ pluginManagement {
 
 
 include(":deprecated-lib")
-include(":advanсed-deprecated-ksp")
+include(":advanced-deprecated-ksp")
 include(":test-app")
 
 //include(":testApp")

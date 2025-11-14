@@ -1,6 +1,6 @@
 package ru.vood.test
 
-import ru.vood.advanсed.deprecated.DeprecatedWithRemoval
+import ru.vood.advanced.deprecated.DeprecatedWithRemoval
 
 @DeprecatedWithRemoval(
     message = "asdasd",
